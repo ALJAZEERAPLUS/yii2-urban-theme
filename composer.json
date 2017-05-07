@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "springdev\\urban": ""
+            "springdev\\urban\\": ""
         }
     },
     "extra": {
