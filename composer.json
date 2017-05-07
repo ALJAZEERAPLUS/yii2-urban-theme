@@ -1,5 +1,5 @@
 {
-    "name": "springdev/urban",
+    "name": "springdev/yii2-urban-theme",
     "description": "Backend theme for Yii2 Framework",
     "type": "yii2-extension",
     "keywords": ["yii2","extension","urban"],
