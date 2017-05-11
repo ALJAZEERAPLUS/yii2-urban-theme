@@ -11,7 +11,7 @@ use yii\web\AssetBundle;
  */
 class UbranAsset extends AssetBundle {
 
-    public $sourcePath = '@vendor/springdev/urban';
+    public $sourcePath = '@vendor/springdev/yii2-urban-theme';
     public $css = [
         'dist/css/climacons-font.249593b4.css',
         'vendor/rickshaw/rickshaw.min.css',
