@@ -1,72 +1,243 @@
-$(document).ready(function () {
-    on_start_up();
-});
-function on_start_up() {
-    j = $(".app"),
-            k = $(".main-panel"),
-            l = $("[data-toggle=layout-chat-open], [data-toggle=chat-dismiss]"),
-            m = $(".chat-users #chat-list a, .chat-back"),
-            n = !1,
-            o = $(".app > .chat-panel");
-    w = !1,
-            x = !1;
-    var p = $(".toggle-active"),
-            q = $("[data-toggle=layout-small-menu]"),
-            r = $("[data-toggle=quick-launch-panel]");
-    var y = $(".sidebar-panel > nav");
-    var t, u, v = $("[data-toggle=offscreen]");
-    k.on("click", function (a) {
-        var b = a.target;
-        x && b !== v && d()
-    });
-    $(".sidebar-panel nav a").on("click", function (b) {
-        var c = $(this),
-                e = c.parents("li"),
-                f = c.closest("li"),
-                g = $(".sidebar-panel nav li").not(e),
-                i = c.next();
-        if (!i.hasClass("sub-menu"))
-            return void d();
-        if (!(j.hasClass("layout-small-menu") && f.parent().hasClass("nav") && $(window).width() > 768))
-        {
-            return g.removeClass("open"), i.is("ul") && 0 === i.height() ? f.addClass("open") : i.is("ul") && 0 !== i.height() && f.removeClass("open"), "#" === c.attr("href") && b.preventDefault(), h(), i.is("ul") ? !1 : (b.stopPropagation(), !0)
+
+'use strict';
+
+/* Debouncer */
+function debounce(func, wait, immediate) {
+    var timeout;
+    return function () {
+        var context = this, args = arguments;
+        var later = function () {
+            timeout = null;
+            if (!immediate) {
+                func.apply(context, args);
+            }
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) {
+            func.apply(context, args);
         }
-    });
-    p.on("click", function (b) {
-        b.preventDefault(), b.stopPropagation(), $(this).toggleClass("active")
-    });
-    q.on("click", function (b) {
-        b.preventDefault(), b.stopPropagation(), j.toggleClass("layout-small-menu"), j.hasClass("layout-small-menu") ? g() : $(window).width() > 768 && !y.hasClass("ps-container") && f()
-    });
-    v.on("click", function (b) {
-        b.preventDefault(), b.stopPropagation(), t = $(this).data("move") ? $(this).data("move") : "ltr", u = "rtl" === t ? "move-right" : "move-left", w || (w = !0, d())
-    }),
-            $(".sidebar-panel").find("> li > .sub-menu").each(function () {
-        $(this).find("ul.sub-menu").length > 0 && $(this).addClass("multi-level")
-    });
-    $(".sidebar-panel").find(".sub-menu").each(function () {
-        $(this).parent("li").addClass("menu-accordion")
-    });
-    function h() {
-        y.hasClass("ps-container") && y.perfectScrollbar("update")
+    };
+}
+
+/* Misc Toggles */
+var toggleActive = $('.toggle-active'),
+        toggleSidebarPanel = $('[data-toggle=layout-small-menu]'),
+        toggleQuickLaunchPanel = $('[data-toggle=quick-launch-panel]');
+
+/* Define some variables */
+var $window = $(window),
+        body = $('body'),
+        app = $('.app'),
+        mainPanel = $('.main-panel');
+
+toggleActive.on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $(this).toggleClass('active');
+});
+
+toggleSidebarPanel.on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    app.toggleClass('layout-small-menu');
+    if (app.hasClass('layout-small-menu')) {
+        destroyScrollbars();
+    } else if ($(window).width() > 768 && !psTarg.hasClass('ps-container')) {
+        console.log('init');
+        initScrollbars();
     }
-    function f() {
-        j.hasClass("layout-small-menu") || j.hasClass("layout-static-sidebar") || j.hasClass("layout-boxed") || $(".sidebar-panel > nav").perfectScrollbar({
-            wheelPropagation: !0,
-            suppressScrollX: !0
-        })
+});
+
+toggleQuickLaunchPanel.on('click', function (e) {
+    e.preventDefault();
+    if (!body.hasClass('layout-quick-launch-panel')) {
+        body.css({transition: '300ms cubic-bezier(.7,0,.3,1)'}).addClass('layout-quick-launch-panel stop-scrolling');
+    } else {
+        body.removeClass('layout-quick-launch-panel');
+        debounce(function () {
+            body.removeClass('stop-scrolling').css({transition: ''});
+        }, 300);
     }
-    function g(a) {
-        "undefined" == typeof a.dataset ? a.removeAttribute("data-ps-id") : delete a.dataset.psId
+    window.scrollTo(0, 0);
+});
+
+$('.scroll-up').on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $('html,body').stop().animate({
+        scrollTop: body.offset().top
+    }, 1000);
+    return false;
+});
+/* Smooth scroll to id */
+var smoothScroll = $('.smooth-scroll');
+
+smoothScroll.on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (location.pathname.replace(/^\//, '') === this.pathname.replace(/^\//, '') && location.hostname === this.hostname) {
+        var target = $(this.hash);
+        target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+        if (target.length) {
+            $('html,body').stop().animate({
+                scrollTop: target.offset().top
+            }, 1000);
+            return false;
+        }
     }
-    function d() {
-        n && c(), x ? (j.removeClass("move-left move-right"), setTimeout(function () {
-            j.removeClass("offscreen")
-        }, 300)) : j.addClass("offscreen " + u), x = !x, e()
+});
+
+/* Toggle Offscreen menu */
+var offscreenToggleBtn = $('[data-toggle=offscreen]'),
+        offscreenDirection,
+        offscreenDirectionClass,
+        rapidClickCheck = false,
+        isOffscreenOpen = false;
+
+function toggleMenu() {
+
+    if (isChatOpen) {
+        toggleChatSidebar();
     }
-    function e() {
-        setTimeout(function () {
-            w = !1
-        }, 300)
+
+    if (isOffscreenOpen) {
+        app.removeClass('offscreen move-left move-right');
+    } else {
+        app.addClass('offscreen ' + offscreenDirectionClass);
+    }
+    isOffscreenOpen = !isOffscreenOpen;
+
+    rapidClickFix();
+}
+
+function rapidClickFix() {
+    debounce(function () {
+        rapidClickCheck = false;
+    }, 300);
+}
+
+offscreenToggleBtn.on('click', function (e) {
+
+    e.preventDefault();
+
+    e.stopPropagation();
+
+    offscreenDirection = $(this).data('move') ? $(this).data('move') : 'ltr';
+
+    if (offscreenDirection === 'rtl') {
+        offscreenDirectionClass = 'move-right';
+    } else {
+        offscreenDirectionClass = 'move-left';
+    }
+
+    if (rapidClickCheck) {
+        return;
+    }
+
+    rapidClickCheck = true;
+
+    toggleMenu();
+
+});
+
+mainPanel.on('click', function (e) {
+    var target = e.target;
+
+    if (isOffscreenOpen && target !== offscreenToggleBtn) {
+        toggleMenu();
+    }
+});
+
+/* Sidebar sub-menus */
+$('.sidebar-panel nav a').on('click', function (e) {
+
+    var $this = $(this),
+            links = $this.parents('li'),
+            parentLink = $this.closest('li'),
+            otherLinks = $('.sidebar-panel nav li').not(links),
+            subMenu = $this.next();
+
+    if (!subMenu.hasClass('sub-menu')) {
+        toggleMenu();
+        return;
+    }
+
+    if (app.hasClass('layout-small-menu') && parentLink.parent().hasClass('nav') && $(window).width() > 768) {
+        return;
+    }
+
+    otherLinks.removeClass('open');
+
+    if (subMenu.is('ul') && (subMenu.height() === 0)) {
+        parentLink.addClass('open');
+    } else if (subMenu.is('ul') && (subMenu.height() !== 0)) {
+        parentLink.removeClass('open');
+    }
+
+    if ($this.attr('href') === '#') {
+        e.preventDefault();
+    }
+
+    updateScrollbars();
+
+    if (subMenu.is('ul')) {
+        return false;
+    }
+
+    e.stopPropagation();
+
+    return true;
+});
+
+$('.sidebar-panel').find('> li > .sub-menu').each(function () {
+    if ($(this).find('ul.sub-menu').length > 0) {
+        $(this).addClass('multi-level');
+    }
+});
+
+$('.sidebar-panel').find('.sub-menu').each(function () {
+    $(this).parent('li').addClass('menu-accordion');
+});
+
+var psTarg = $('.sidebar-panel > nav');
+
+function initScrollbars() {
+    if (app.hasClass('layout-small-menu') || app.hasClass('layout-static-sidebar') || app.hasClass('layout-boxed')) {
+        return;
+    }
+
+    $('.sidebar-panel > nav').perfectScrollbar({
+        wheelPropagation: true,
+        suppressScrollX: true
+    });
+}
+
+function destroyScrollbars() {
+    psTarg.perfectScrollbar('destroy').removeClass();
+}
+
+function updateScrollbars() {
+    if (psTarg.hasClass('ps-container')) {
+        psTarg.perfectScrollbar('update');
     }
 }
+
+initScrollbars();
+
+var watchScrollbars = debounce(function () {
+    if (767 >= window.innerWidth) {
+        if (psTarg.hasClass('ps-container')) {
+            destroyScrollbars();
+        }
+        return;
+    } else {
+        if (!psTarg.hasClass('ps-container')) {
+            initScrollbars();
+        }
+        return;
+    }
+}, 300);
+
+window.addEventListener('resize', watchScrollbars);
