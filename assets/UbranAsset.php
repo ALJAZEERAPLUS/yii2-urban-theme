@@ -18,8 +18,8 @@ class UbranAsset extends AssetBundle {
         'dist/css/app.css',
     ];
     public $js = [
+        'dist/js/perfect-scrollbar.jquery.js',
         'dist/js/app.js',
-        
     ];
     public $depends = [
         'rmrevin\yii\fontawesome\AssetBundle',
@@ -27,6 +27,6 @@ class UbranAsset extends AssetBundle {
         'yii\bootstrap\BootstrapAsset',
         'yii\bootstrap\BootstrapPluginAsset',
     ];
-    
 
 }
+
