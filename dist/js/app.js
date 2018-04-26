@@ -98,9 +98,9 @@ var offscreenToggleBtn = $('[data-toggle=offscreen]'),
 
 function toggleMenu() {
 
-    if (isChatOpen) {
-        toggleChatSidebar();
-    }
+//    if (isChatOpen) {
+//        toggleChatSidebar();
+//    }
 
     if (isOffscreenOpen) {
         app.removeClass('offscreen move-left move-right');
